@@ -4,11 +4,7 @@ class AdsScript {
 
 	private function getUrl () {
 
-		$url = $_Get['u'];
-
-		$url = str_replace("%3A", ":", $url);
-
-		$url = str_replace("%2F", "/", $url);
+		$url = $_GET['u'];
 
 		return $url;
 
@@ -16,13 +12,32 @@ class AdsScript {
 
 	public function getTitle (){
 
-		$url = $this->getUrl;
+		$url = $this->getUrl();
 
-		$html = file_get_html($url);
+		$html = file_get_html("http://www.facebook.com");
 
 		$title = $html->find('title', 0)->innertext;
 
 		return $title;
+
+	}
+
+	public function getImg () {
+
+		$title = $this->getTitle();
+
+		$title = str_replace(" ","%20",$title);
+
+		$json = file_get_contents("http://ajax.googleapis.com/ajax/services/search/images?v=1.0&q=".$title);
+
+		$data = json_decode($json);
+
+		foreach ($data->responseData->results as $result) {
+    	$img = $result->url;
+    	break;
+		}
+
+		return $img;
 
 	}
 

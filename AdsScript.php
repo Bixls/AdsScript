@@ -10,15 +10,74 @@ class AdsScript {
 
 	}
 
+	public function cash () {
+
+		$url = $this->getUrl;
+
+		$query = "SELECT * FROM AdsCash WHERE url = $url";
+
+		$sql = mysql_query($query);
+
+		$array = new array();
+
+		if ($sql)
+		{
+			$result = mysql_fetch_assoc($sql);
+
+			$arr["result"]=true;
+
+			$arr["title"] = $result['title'];
+
+			$arr["img"] = $result['img'];
+
+		}
+		else if (!$sql)
+		{
+			$arr["result"]=false;
+
+			$this->saveCash();
+		}
+
+		return $array;
+
+	}
+
+	public function saveCash () {
+
+		$url = $this->getUrl;
+
+		$title = $this->getTitle();
+
+		$img = $this->getImg();
+
+		$query = "INSERT INTO AdsCash (url,title,img) VALUES '$url','$title','$img'";
+
+		$sql = mysql_query($query);
+
+	}
+
 	public function getTitle (){
+
+		$arr = $this->cash();
+
+		if ($arr["result"])
+		{
+			$title=$array["title"];
+
+			return $title;
+		}
+
+		else if (!$arr["result"])
+		{
 
 		$url = $this->getUrl();
 
-		$html = file_get_html("http://www.facebook.com");
+		$html = file_get_html($url);
 
 		$title = $html->find('title', 0)->innertext;
 
 		return $title;
+		}
 
 	}
 
@@ -26,9 +85,21 @@ class AdsScript {
 
 		$title = $this->getTitle();
 
-		$title = str_replace(" ","%20",$title);
+		$arr = $this->cash();
 
-		$json = file_get_contents("http://ajax.googleapis.com/ajax/services/search/images?v=1.0&q=".$title);
+		if ($arr["result"])
+		{
+			$title=$arr["img"];
+
+			return $img;
+		}
+
+		else if (!$arr["result"])
+		{
+
+		$searchurl = "http://ajax.googleapis.com/ajax/services/search/images?v=1.0&q=".urlencode($title);
+
+		$json = file_get_contents($searchurl);
 
 		$data = json_decode($json);
 
@@ -38,6 +109,7 @@ class AdsScript {
 		}
 
 		return $img;
+		}
 
 	}
 

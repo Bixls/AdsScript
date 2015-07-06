@@ -2,9 +2,38 @@
 
 class AdsScript {
 
+	public function __construct () {
+
+		$url = $this->getUrl();
+
+		$query = "SELECT * FROM AdsCash WHERE url = '$url'";
+
+		$sql = mysql_query($query);
+
+		if(mysql_num_rows($sql)==0){
+
+		$title = $this->getTitle();
+
+		$img = $this->getImg();
+
+		$query = "INSERT INTO AdsCash (url,title,img) VALUES ('$url','$title','$img')";
+
+		$sql = mysql_query($query);
+
+		}
+
+	}
+
 	private function getUrl () {
 
-		$url = $_GET['u'];
+		parse_str(substr($_SERVER["HTTP_REFERER"],strrpos($_SERVER["HTTP_REFERER"],"?")+1), $output);
+		
+		$url = urldecode($output["u"]);
+
+		if (empty ( $url ))
+		{
+			$url = "http://www.google.com";
+		}
 
 		return $url;
 
@@ -12,16 +41,16 @@ class AdsScript {
 
 	public function cash () {
 
-		$url = $this->getUrl;
+		$url = $this->getUrl();
 
-		$query = "SELECT * FROM AdsCash WHERE url = $url";
+		$query = "SELECT * FROM AdsCash WHERE url = '$url'";
 
 		$sql = mysql_query($query);
 
-		$array = new array();
+		$arr = array();
 
-		if ($sql)
-		{
+		if(mysql_num_rows($sql)>0){
+
 			$result = mysql_fetch_assoc($sql);
 
 			$arr["result"]=true;
@@ -31,38 +60,25 @@ class AdsScript {
 			$arr["img"] = $result['img'];
 
 		}
-		else if (!$sql)
+		else
 		{
 			$arr["result"]=false;
-
-			$this->saveCash();
 		}
 
-		return $array;
+		return $arr;
 
 	}
 
-	public function saveCash () {
-
-		$url = $this->getUrl;
-
-		$title = $this->getTitle();
-
-		$img = $this->getImg();
-
-		$query = "INSERT INTO AdsCash (url,title,img) VALUES '$url','$title','$img'";
-
-		$sql = mysql_query($query);
-
-	}
 
 	public function getTitle (){
+
+		$arr = array();
 
 		$arr = $this->cash();
 
 		if ($arr["result"])
 		{
-			$title=$array["title"];
+			$title=$arr["title"];
 
 			return $title;
 		}
@@ -83,19 +99,21 @@ class AdsScript {
 
 	public function getImg () {
 
-		$title = $this->getTitle();
+		$arr = array();
 
 		$arr = $this->cash();
 
 		if ($arr["result"])
 		{
-			$title=$arr["img"];
+			$img=$arr["img"];
 
 			return $img;
 		}
 
 		else if (!$arr["result"])
 		{
+
+		$title = $this->getTitle();
 
 		$searchurl = "http://ajax.googleapis.com/ajax/services/search/images?v=1.0&q=".urlencode($title);
 

@@ -126,6 +126,8 @@ class AdsScript {
     	break;
 		}
 
+		$img = urldecode($img);
+
 		return $img;
 		}
 
